@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Daltonismo - Machado et al.</title>
+    <style>
+        :root {
+            --cor-principal: #0272BD;
+            --cor-segundo: #737373;
+
+            --font-texto: "Montserrat-regular", sans-serif;
+            --font-titulo: "Montserrat-medium", sans-serif;
+            --font-titulo2: "Montserrat-bold", sans-serif;
+
+            --transicao-padrao: all 0.5s ease;
+        }
+
+        @font-face {
+            font-family: "Montserrat-regular";
+            src: url(./Fontes/Montserrat/static/Montserrat-Regular.ttf);
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "Montserrat-medium";
+            src: url(./Fontes/Montserrat/static/Montserrat-Medium.ttf);
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "Montserrat-bold";
+            src: url(./Fontes/Montserrat/static/Montserrat-Bold.ttf);
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-texto);
+            background: var(--cor-principal);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            margin-top: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+            margin-top: 30px;
+        }
+
+        .input-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #555;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .color-input-wrapper {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        input[type="color"] {
+            width: 80px;
+            height: 50px;
+            border: 3px solid #ddd;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        input[type="color"]:hover {
+            transform: scale(1.05);
+        }
+
+        input[type="text"],
+        input[type="number"] {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: 'Courier New', monospace;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .rgb-inputs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .rgb-input {
+            flex: 1;
+        }
+
+        .rgb-input input {
+            width: 100%;
+            text-align: center;
+        }
+
+        .rgb-input span {
+            display: block;
+            text-align: center;
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        .severity-control {
+            margin-top: 25px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        .severity-value {
+            text-align: center;
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #667eea;
+            margin-top: 10px;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .color-preview {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .color-preview:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .color-box {
+            width: 100%;
+            height: 120px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            border: 3px solid #eee;
+        }
+
+        .color-name {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            text-align: center;
+        }
+
+        .color-hex {
+            font-family: 'Courier New', monospace;
+            color: #666;
+            font-size: 0.95em;
+            text-align: center;
+            background: #f8f9fa;
+            padding: 8px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+
+        .color-rgb {
+            font-family: 'Courier New', monospace;
+            color: #888;
+            font-size: 0.85em;
+            text-align: center;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 30px;
+            font-size: 0.9em;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            color: #1976d2;
+        }
+
+        .botao-acao {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            font-family: var(--font-texto);
+            color: white;
+            font-size: 0.95rem;
+            border-radius: 5px;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: all 0.5s ease;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .botao-return {
+            background: var(--cor-principal);
+            color: white;
+            border: 2px solid var(--color-primary);
+        }
+
+        .botao-return:hover {
+            box-shadow: 0 0 20px var(--cor-principal)
+        }
+
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .reverse-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .reverse-results {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1> Novo Olhar</h1>
+        <p class="subtitle">Baseado no modelo fisiológico de Machado, Oliveira e Fernandes (2009)</p>
+
+        <pc class="subtitle">Explore como as cores são vistas por pessoas com diferentes tipos de daltonismo e compreenda suas percepções visuais.</p>
+
+        <div class="main-grid">
+            <!-- Controls Panel -->
+            <div class="input-section">
+                <div class="input-group">
+                    <label>Selecione uma cor:</label>
+                    <div class="color-input-wrapper">
+                        <input type="color" id="colorPicker" value="#FF5733">
+                        <input type="text" id="hexInput" placeholder="#FF5733" maxlength="7" value="#FF5733">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <label>Ou insira valores RGB (0-255):</label>
+                    <div class="rgb-inputs">
+                        <div class="rgb-input">
+                            <input type="number" id="rInput" min="0" max="255" value="255">
+                            <span>R</span>
+                        </div>
+                        <div class="rgb-input">
+                            <input type="number" id="gInput" min="0" max="255" value="87">
+                            <span>G</span>
+                        </div>
+                        <div class="rgb-input">
+                            <input type="number" id="bInput" min="0" max="255" value="51">
+                            <span>B</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="severity-control">
+                    <label>Severidade do Daltonismo:</label>
+                    <input type="range" id="severitySlider" min="0" max="100" value="100">
+                    <div class="severity-value">
+                        <span id="severityValue">100</span>%
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div class="results-grid">
+                <div class="color-preview">
+                    <div class="color-box" id="normalBox"></div>
+                    <div class="color-name">Visão Normal</div>
+                    <div class="color-hex" id="normalHex">#FF5733</div>
+                    <div class="color-rgb" id="normalRgb">RGB(255, 87, 51)</div>
+                </div>
+
+                <div class="color-preview">
+                    <div class="color-box" id="protanBox"></div>
+                    <div class="color-name">Protanopia</div>
+                    <div class="color-hex" id="protanHex">#000000</div>
+                    <div class="color-rgb" id="protanRgb">RGB(0, 0, 0)</div>
+                </div>
+
+                <div class="color-preview">
+                    <div class="color-box" id="deutanBox"></div>
+                    <div class="color-name">Deuteranopia</div>
+                    <div class="color-hex" id="deutanHex">#000000</div>
+                    <div class="color-rgb" id="deutanRgb">RGB(0, 0, 0)</div>
+                </div>
+
+                <div class="color-preview">
+                    <div class="color-box" id="tritanBox"></div>
+                    <div class="color-name">Tritanopia</div>
+                    <div class="color-hex" id="tritanHex">#000000</div>
+                    <div class="color-rgb" id="tritanRgb">RGB(0, 0, 0)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong>Sobre os tipos de daltonismo:</strong><br>
+            • <strong>Protanopia:</strong> Deficiência no cone L (vermelho). Afeta ~1% dos homens.<br>
+            • <strong>Deuteranopia:</strong> Deficiência no cone M (verde). Afeta ~1% dos homens.<br>
+            • <strong>Tritanopia:</strong> Deficiência no cone S (azul). Extremamente rara (~0.001%).<br>
+            <br>
+            <strong>Algoritmo:</strong> Matrizes de transformação de Machado et al. (2009) com interpolação de
+            severidade.
+        </div>
+
+        <div class="botao-acao">
+            <button onclick="history.back()" class="btn botao-return">Retornar ao site</button>
+        </div>
+
+    </div>
+
+    <script>
+        // Matrizes de Machado et al. (2009)
+        const MATRICES = {
+            protan_1_0: [
+                [0.152286, 1.052583, -0.204868],
+                [0.114503, 0.786281, 0.099216],
+                [-0.003882, -0.048116, 1.051998]
+            ],
+            deutan_1_0: [
+                [0.367322, 0.860646, -0.227968],
+                [0.280085, 0.672501, 0.047413],
+                [-0.011820, 0.042940, 0.968881]
+            ],
+            tritan_1_0: [
+                [1.255528, -0.076749, -0.178779],
+                [-0.078411, 0.930809, 0.147602],
+                [0.004733, 0.691367, 0.303900]
+            ],
+            protan_0_5: [
+                [0.458064, 0.679578, -0.137642],
+                [0.092785, 0.846313, 0.060902],
+                [-0.007494, -0.016807, 1.024301]
+            ],
+            deutan_0_5: [
+                [0.547494, 0.607765, -0.155259],
+                [0.181692, 0.781742, 0.036566],
+                [-0.010410, 0.027275, 0.983136]
+            ],
+            tritan_0_5: [
+                [1.017277, 0.027029, -0.044306],
+                [-0.006113, 0.958479, 0.047634],
+                [0.006379, 0.248708, 0.744913]
+            ],
+            normal: [
+                [1.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0],
+                [0.0, 0.0, 1.0]
+            ]
+        };
+
+        function hexToRgb(hex) {
+            hex = hex.replace('#', '');
+            if (hex.length === 3) {
+                hex = hex.split('').map(c => c + c).join('');
+            }
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            return { r, g, b };
+        }
+
+        function rgbToHex(r, g, b) {
+            r = Math.max(0, Math.min(255, Math.round(r)));
+            g = Math.max(0, Math.min(255, Math.round(g)));
+            b = Math.max(0, Math.min(255, Math.round(b)));
+            return '#' + [r, g, b].map(x => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }).join('').toUpperCase();
+        }
+
+        function interpolateMatrix(m1, m2, t) {
+            const result = [];
+            for (let i = 0; i < 3; i++) {
+                result[i] = [];
+                for (let j = 0; j < 3; j++) {
+                    result[i][j] = m1[i][j] * (1 - t) + m2[i][j] * t;
+                }
+            }
+            return result;
+        }
+
+        function getMatrixForSeverity(type, severity) {
+            if (severity === 0) {
+                return MATRICES.normal;
+            } else if (severity <= 0.5) {
+                const t = severity / 0.5;
+                return interpolateMatrix(MATRICES.normal, MATRICES[type + '_0_5'], t);
+            } else {
+                const t = (severity - 0.5) / 0.5;
+                return interpolateMatrix(MATRICES[type + '_0_5'], MATRICES[type + '_1_0'], t);
+            }
+        }
+
+        function simulateColor(r, g, b, type, severity) {
+            const matrix = getMatrixForSeverity(type, severity);
+
+            const rNorm = r / 255;
+            const gNorm = g / 255;
+            const bNorm = b / 255;
+
+            const rNew = matrix[0][0] * rNorm + matrix[0][1] * gNorm + matrix[0][2] * bNorm;
+            const gNew = matrix[1][0] * rNorm + matrix[1][1] * gNorm + matrix[1][2] * bNorm;
+            const bNew = matrix[2][0] * rNorm + matrix[2][1] * gNorm + matrix[2][2] * bNorm;
+
+            const rClamped = Math.max(0, Math.min(1, rNew));
+            const gClamped = Math.max(0, Math.min(1, gNew));
+            const bClamped = Math.max(0, Math.min(1, bNew));
+
+            const rFinal = Math.round(rClamped * 255);
+            const gFinal = Math.round(gClamped * 255);
+            const bFinal = Math.round(bClamped * 255);
+
+            return {
+                r: rFinal,
+                g: gFinal,
+                b: bFinal,
+                hex: rgbToHex(rFinal, gFinal, bFinal)
+            };
+        }
+
+        function updateSimulation() {
+            const hex = document.getElementById('hexInput').value;
+            const r = parseInt(document.getElementById('rInput').value) || 0;
+            const g = parseInt(document.getElementById('gInput').value) || 0;
+            const b = parseInt(document.getElementById('bInput').value) || 0;
+            const severity = parseInt(document.getElementById('severitySlider').value) / 100;
+
+            // Atualizar cores
+            document.getElementById('normalBox').style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+            document.getElementById('normalHex').textContent = rgbToHex(r, g, b);
+            document.getElementById('normalRgb').textContent = `RGB(${r}, ${g}, ${b})`;
+
+            const protan = simulateColor(r, g, b, 'protan', severity);
+            document.getElementById('protanBox').style.backgroundColor = `rgb(${protan.r}, ${protan.g}, ${protan.b})`;
+            document.getElementById('protanHex').textContent = protan.hex;
+            document.getElementById('protanRgb').textContent = `RGB(${protan.r}, ${protan.g}, ${protan.b})`;
+
+            const deutan = simulateColor(r, g, b, 'deutan', severity);
+            document.getElementById('deutanBox').style.backgroundColor = `rgb(${deutan.r}, ${deutan.g}, ${deutan.b})`;
+            document.getElementById('deutanHex').textContent = deutan.hex;
+            document.getElementById('deutanRgb').textContent = `RGB(${deutan.r}, ${deutan.g}, ${deutan.b})`;
+
+            const tritan = simulateColor(r, g, b, 'tritan', severity);
+            document.getElementById('tritanBox').style.backgroundColor = `rgb(${tritan.r}, ${tritan.g}, ${tritan.b})`;
+            document.getElementById('tritanHex').textContent = tritan.hex;
+            document.getElementById('tritanRgb').textContent = `RGB(${tritan.r}, ${tritan.g}, ${tritan.b})`;
+        }
+
+        function calculateReverse() {
+            const hex = document.getElementById('reverseHexInput').value;
+            const type = document.getElementById('reverseTypeSelect').value;
+            const targetRgb = hexToRgb(hex);
+
+            // Busca simples por força bruta
+            let bestColor = { r: 0, g: 0, b: 0, error: Infinity };
+
+            for (let r = 0; r <= 255; r += 5) {
+                for (let g = 0; g <= 255; g += 5) {
+                    for (let b = 0; b <= 255; b += 5) {
+                        const sim = simulateColor(r, g, b, type, 1.0);
+                        const error = Math.sqrt(
+                            Math.pow(sim.r - targetRgb.r, 2) +
+                            Math.pow(sim.g - targetRgb.g, 2) +
+                            Math.pow(sim.b - targetRgb.b, 2)
+                        );
+
+                        if (error < bestColor.error) {
+                            bestColor = { r, g, b, error };
+                        }
+                    }
+                }
+            }
+
+            // Refinamento fino
+            for (let r = Math.max(0, bestColor.r - 10); r <= Math.min(255, bestColor.r + 10); r++) {
+                for (let g = Math.max(0, bestColor.g - 10); g <= Math.min(255, bestColor.g + 10); g++) {
+                    for (let b = Math.max(0, bestColor.b - 10); b <= Math.min(255, bestColor.b + 10); b++) {
+                        const sim = simulateColor(r, g, b, type, 1.0);
+                        const error = Math.sqrt(
+                            Math.pow(sim.r - targetRgb.r, 2) +
+                            Math.pow(sim.g - targetRgb.g, 2) +
+                            Math.pow(sim.b - targetRgb.b, 2)
+                        );
+
+                        if (error < bestColor.error) {
+                            bestColor = { r, g, b, error };
+                        }
+                    }
+                }
+            }
+
+            const resultHtml = `
+                <div class="color-preview">
+                    <div class="color-box" style="background-color: rgb(${bestColor.r}, ${bestColor.g}, ${bestColor.b})"></div>
+                    <div class="color-name">Cor de Entrada</div>
+                    <div class="color-hex">${rgbToHex(bestColor.r, bestColor.g, bestColor.b)}</div>
+                    <div class="color-rgb">RGB(${bestColor.r}, ${bestColor.g}, ${bestColor.b})</div>
+                    <div style="font-size: 0.8em; color: #999; margin-top: 10px;">Erro: ${bestColor.error.toFixed(2)}</div>
+                </div>
+            `;
+
+            document.getElementById('reverseResults').innerHTML = resultHtml;
+        }
+
+        // Event listeners
+        document.getElementById('colorPicker').addEventListener('change', (e) => {
+            document.getElementById('hexInput').value = e.target.value;
+            const rgb = hexToRgb(e.target.value);
+            document.getElementById('rInput').value = rgb.r;
+            document.getElementById('gInput').value = rgb.g;
+            document.getElementById('bInput').value = rgb.b;
+            updateSimulation();
+        });
+
+        document.getElementById('hexInput').addEventListener('input', (e) => {
+            if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                document.getElementById('colorPicker').value = e.target.value;
+                const rgb = hexToRgb(e.target.value);
+                document.getElementById('rInput').value = rgb.r;
+                document.getElementById('gInput').value = rgb.g;
+                document.getElementById('bInput').value = rgb.b;
+                updateSimulation();
+            }
+        });
+
+        document.getElementById('rInput').addEventListener('input', () => {
+            const r = parseInt(document.getElementById('rInput').value) || 0;
+            const g = parseInt(document.getElementById('gInput').value) || 0;
+            const b = parseInt(document.getElementById('bInput').value) || 0;
+            const hex = rgbToHex(r, g, b);
+            document.getElementById('colorPicker').value = hex;
+            document.getElementById('hexInput').value = hex;
+            updateSimulation();
+        });
+
+        document.getElementById('gInput').addEventListener('input', () => {
+            const r = parseInt(document.getElementById('rInput').value) || 0;
+            const g = parseInt(document.getElementById('gInput').value) || 0;
+            const b = parseInt(document.getElementById('bInput').value) || 0;
+            const hex = rgbToHex(r, g, b);
+            document.getElementById('colorPicker').value = hex;
+            document.getElementById('hexInput').value = hex;
+            updateSimulation();
+        });
+
+        document.getElementById('bInput').addEventListener('input', () => {
+            const r = parseInt(document.getElementById('rInput').value) || 0;
+            const g = parseInt(document.getElementById('gInput').value) || 0;
+            const b = parseInt(document.getElementById('bInput').value) || 0;
+            const hex = rgbToHex(r, g, b);
+            document.getElementById('colorPicker').value = hex;
+            document.getElementById('hexInput').value = hex;
+            updateSimulation();
+        });
+
+        document.getElementById('severitySlider').addEventListener('input', (e) => {
+            document.getElementById('severityValue').textContent = e.target.value;
+            updateSimulation();
+        });
+
+        document.getElementById('reverseColorPicker').addEventListener('change', (e) => {
+            document.getElementById('reverseHexInput').value = e.target.value;
+        });
+
+        document.getElementById('reverseHexInput').addEventListener('input', (e) => {
+            if (/^#[0-9A-F]{6}$/i.test(e.target.value)) {
+                document.getElementById('reverseColorPicker').value = e.target.value;
+            }
+        });
+
+        // Inicializar
+        updateSimulation();
+    </script>
+</body>
+
+</html>
