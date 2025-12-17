@@ -520,7 +520,6 @@
         <div class="header-info">
             <span class="material-icons" style="font-size: 1rem;">keyboard</span>
             <span>Shift + <span class="key-badge">M</span> Microfone</span>
-            <span>Shift + <span class="key-badge">C</span> Chat</span>
         </div>
     </header>
 
@@ -785,38 +784,6 @@
 
                 if (feedback) { showStatus(feedback); speak(feedback); }
                 else { showStatus("Não entendi", true); playSound('error'); }
-            }
-
-            // --- LÓGICA CHATBOT ---
-            const knowledgeBase = {
-                "oi": "Olá! Sou o assistente CyBR. Como ajudo?",
-                "ola": "Olá! Tudo bem?",
-                "projeto": "O CyBR usa voz e IA para acessibilidade web.",
-                "senai": "O SENAI é nosso parceiro em educação tecnológica.",
-                "microsoft": "A Microsoft fornece tecnologia de IA.",
-                "comandos": "Diga: 'Descer página', 'Aumentar fonte' ou 'Modo contraste'.",
-                "ajuda": "Pergunte sobre 'projeto', 'comandos' ou 'parceiros'.",
-                "default": "Desculpe, não entendi. Tente 'ajuda'."
-            };
-
-            function addMessage(text, type) {
-                const d = document.createElement('div');
-                d.className = `message ${type}`;
-                d.innerText = text;
-                chatMessages.appendChild(d);
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                if (type === 'bot') { playSound('msg'); speak(text); }
-            }
-
-            function handleChatSubmit() {
-                const txt = chatInput.value.trim().toLowerCase();
-                if (!txt) return;
-                addMessage(chatInput.value, 'user');
-                chatInput.value = '';
-
-                let resp = knowledgeBase.default;
-                for (let k in knowledgeBase) { if (txt.includes(k) && k !== 'default') { resp = knowledgeBase[k]; break; } }
-                setTimeout(() => addMessage(resp, 'bot'), 600);
             }
 
             // --- EVENT LISTENERS ---
